@@ -1,7 +1,7 @@
 # travelrouter
 
 These notes and hints were prepared several months after I quickly setup a vpn router for portable use.
-There are probably some details missing, but hopefully this is a start for you and you needs.
+There are probably some details missing, but hopefully this is a start for you and your needs.
 
 This attempts to document the build of my setup for a traveling gl inet 6416 which offers a wifi AP which is tunneled to my home router. 
 
