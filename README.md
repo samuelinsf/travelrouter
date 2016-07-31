@@ -30,8 +30,9 @@ Then I made two sets of keys, one for the home router, one for the roving router
 
 The these go into the /etc/config/quicktun files on the hosts (see the comments in the config for clarity on which key strings go where).
 
+## Roving router.
 
-## On the roving router there is a bridge network with the vpn'd wifi AP on it, and the tap0 from the quicktun. In this example the network is named quicktun0:
+On the roving router there is a bridge network with the vpn'd wifi AP on it, and the tap0 from the quicktun. In this example the network is named quicktun0:
 
 ```
 From roving /etc/config/network:
@@ -50,7 +51,7 @@ config interface 'quicktun0'
 
 ```
 
-## The home side is the default route (in this example 10.0.42.4 ). And we use 8.8.8.8 as the name server (which goes out through the masq on the home side. But we run dhcp on the roving router, so clients are always assigned default route config, mtu and IP numbers.
+The home side is the default route (in this example 10.0.42.4 ). And we use 8.8.8.8 as the name server (which goes out through the masq on the home side. But we run dhcp on the roving router, so clients are always assigned default route config, mtu and IP numbers.
 
 ```
 From roving /etc/config/dhcp:
@@ -70,7 +71,7 @@ config dhcp 'quicktun0'
 ...
 ```
 
-## The firewall setup needs holes for the udp used by quicktun.
+The firewall setup needs holes for the udp used by quicktun.
 
 ```
 From roving /etc/config/firewall:
@@ -100,7 +101,7 @@ config rule
 ...
 ```
 
-## The wireless AP is attached to the network with tap0 from quicktun:
+The wireless AP is attached to the network with tap0 from quicktun:
 
 ```
 From roving /etc/config/wireless:
@@ -117,7 +118,7 @@ config wifi-iface
 ...
 ```
 
-## Quicktun on the roving router provides a tap0 hooked to a tap0 on the home router.
+Quicktun on the roving router provides a tap0 hooked to a tap0 on the home router.
 
 ```
 From the roving /etc/config/quicktun:
@@ -146,7 +147,7 @@ config quicktun tap0
 
 # Home side.
 
-## Quicktun creates a tap0 which is setup to masquerade to the open internet.
+Quicktun creates a tap0 which is setup to masquerade to the open internet.
 
 ```
 From home side /etc/config/network:
@@ -163,7 +164,7 @@ config interface 'quicktun0'
 ...
 ```
 
-## The quicktun0 network is masqueraded over to the wan. Port 2777 is allowed in from the wan side.
+The quicktun0 network is masqueraded over to the wan. Port 2777 is allowed in from the wan side.
 
 ```
 From home side /etc/config/firewall:
@@ -184,7 +185,7 @@ config forwarding
 ...
 ```
 
-## Quicktun on the home side is configured for the roaming unit to be at any ip.
+Quicktun on the home side is configured for the roaming unit to be at any ip.
 
 ```
 
@@ -208,7 +209,9 @@ config quicktun tap0
 
 ```
 
-## When the roving router's wan link is a captive portal, a socks proxy running on the roving router can allow a browser on the safe wifi network to interact with the portal, thus allowing a safe path to registering and getting the captive portal to pass the vpn traffic.
+## Captive portal.
+
+When the roving router's wan link is a captive portal, a socks proxy running on the roving router can allow a browser on the safe wifi network to interact with the portal, thus allowing a safe path to registering and getting the captive portal to pass the vpn traffic.
 
 ```
 Install sockd:
