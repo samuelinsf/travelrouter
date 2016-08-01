@@ -1,5 +1,26 @@
 # travelrouter
 
+When traveling, it would be very nice to be able to VPN into my home network.
+It would be great if my traveling devices appeared to be attached to the
+internet from my home router, instead of whatever distant land I happen to be in.
+
+I would like this to work across all my devices.
+Laptop, phone, tablet, and my family's devices as well.
+All of these devices easily connect via wifi, so why not use that
+path to put them all on a secure VPN back to my home network?
+
+I couldn't find a good solution to this, so here are some notes on how I built my own.
+
+Features:
+
+* Small hardware (box of playing cards sized, lightweight, low power, battery optional)
+* Provides a secure wifi network, devices connected to that network appear to be connected to the internet via my home ISP connection.
+* Traveling vpn device uses wifi client mode (or ethernet) to connect to the untrusted network.
+* System fails safe, if the VPN cannot come up, my devices never talk on the untrusted network.
+* Supports ethernet bridge mode, so all protocols and technologies work over the VPN.
+* All based on Openwrt (2015 chaos calmer version) and Quicktun (a nacl crypto simple vpn)
+
+
 These notes and hints were prepared several months after I quickly setup a vpn router for portable use.
 There are probably some details missing, but hopefully this is a start for you and your needs.
 
@@ -146,6 +167,8 @@ config quicktun tap0
 ```
 
 # Home side.
+
+My home router is an engenius ar1750, running openwrt, but a glinet 6416 or any other openwrt you can get the quicktun package built for can work. The ar1750 is object code compatible with the glinet 6416, making things easy.
 
 Quicktun creates a tap0 which is setup to masquerade to the open internet.
 
