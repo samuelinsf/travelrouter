@@ -287,7 +287,7 @@ Append startup for sockd in /etc/rc.local:
 sockd -D
 
 The roaming router is using the dhcp server's resolver:
-verify /etc/resolv.conf is a symlink pointing to /tmp/resolv.conf.atuo
+verify /etc/resolv.conf is a symlink pointing to /tmp/resolv.conf.auto
 
 Start firefox on OSX with a special profile to use the socks5 path:
 
