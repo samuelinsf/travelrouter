@@ -29,7 +29,7 @@ This attempts to document the build of my setup for a traveling gl inet 6416 whi
 * See: http://www.gl-inet.com/gl-inet6416/
 * And on amazon: https://www.amazon.com/Gl-iNet-Smart-Router-Openwrt-Modem/dp/B00JKFE0FW
 
-All this is setup on openwrt chaos calmer aka 15.03.
+All this is setup on openwrt chaos calmer aka 15.05.
 
 ## Quicktun install.
 
@@ -287,7 +287,7 @@ Append startup for sockd in /etc/rc.local:
 sockd -D
 
 The roaming router is using the dhcp server's resolver:
-verify /etc/resolv.conf is a symlink pointing to /tmp/resolv.conf.atuo
+verify /etc/resolv.conf is a symlink pointing to /tmp/resolv.conf.auto
 
 Start firefox on OSX with a special profile to use the socks5 path:
 
