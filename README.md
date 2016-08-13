@@ -231,6 +231,11 @@ config quicktun tap0
 ...
 
 ```
+## Known Problems
+
+If the travel router is configured in wifi client mode, and AP mode at the same time, and the client mode wifi becomes unavailable, the AP wifi will stop working. The fix is to disable the client wifi connection. I typically do this in the web UI before I leave a hotel where the router is on the wifi as a client. If I forget I have to connect to the travel router over the ethernet interface to fix the router.  This bug is in the hostapd for openwrt. See https://dev.openwrt.org/ticket/12000#comment:9  and https://forum.openwrt.org/viewtopic.php?id=41610 for more information about this. Ideally we should just debug and fix hostapd. (Its not that bad, just need to fully grok the netlink situation it is getting into).
+
+Sometimes quicktun fails to come up if dns is not available on the wan at the right time.  Running `/etc/init.d/quicktun restart` fixes this.
 
 ## Captive portal.
 
