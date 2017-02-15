@@ -76,10 +76,12 @@ router$ opkg install quicktun_2.2.5-4_ar71xx.ipk
 
 Then I made two sets of keys, one for the home router, one for the roving router.
 ```
-# quicktun.keypair
+quicktun.keypair
+...
+quicktun.keypair
 ```
 
-The these go into the /etc/config/quicktun files on the hosts (see the comments in the config for clarity on which key strings go where).
+Save these, they go into the /etc/config/quicktun files on the hosts (see the comments in the config for clarity on which key strings go where).
 
 ## Roving router.
 
