@@ -33,20 +33,50 @@ All this is setup on openwrt chaos calmer aka 15.05.
 
 ## Quicktun install.
 
-The `quicktun.openwrt.1505rc3_package.tgz` file here is meant to be dropped into an openwrt git checkout in `feeds/oldpackages/net/quicktun`. I was then able to make menuconfig add quicktun to the build, and build for the ar71xx platform.
-That is how `quicktun_2.2.4-2_ar71xx.ipk` was built.
-(Fuzzy memory here, .. I am missing my exact build notes)
+To build quicktun I did these steps (OpenWRT docs may provide a quicker method, this is what worked for me).
+(OpenWRT docs: https://wiki.openwrt.org/doc/howto/build has build prerequisites .. I already had these on my system)
 
-Quicktun package for openwrt was very old and out of date, this version has updates to work with the new init system, etc.
+```
+git clone git://git.openwrt.org/15.05/openwrt.git
+cd openwrt
+git checkout 15.05
+```
+
+Add the nacl library with the feeds system:
+
+```
+./scripts/feeds update -a
+./scripts/feeds install nacl
+```
+
+Then copy the contents of the `quicktun` directory from this repo into `openwrt/package/quicktun`.
+
+`make menuconfig`
+
+Set the `Target System` to your platform, in my case `Atheros AR7xxx/AR9xxx`.
+
+Set quicktun to be built, go to `Network -> VPN` and for the quicktun package set it to be built `<*>`.
+
+Set nacl to be built, go to `Libraries` and for nacl package set to be built: `<*>`.
+
+Exit menuconfig, saving your changes to .config.
+Then you can do a `make`.
+
+Find the package file .. I suppose there is a right way to do this .. but I just ran:
+```
+find . -name '*quicktun*ipk'
+```
+On my system the package file showed up in: `bin/ar71xx/packages/base/quicktun_2.2.5-4_ar71xx.ipk`
+
 
 I built the package on my intel desktop linux system, and copied it over to the home, and roving routers, then did:
 ```
-router$ opkg install quicktun_2.2.4-2_ar71xx.ipk
+router$ opkg install quicktun_2.2.5-4_ar71xx.ipk
 ```
 
 Then I made two sets of keys, one for the home router, one for the roving router.
 ```
-# quicktun.keypair < /dev/urandom
+# quicktun.keypair
 ```
 
 The these go into the /etc/config/quicktun files on the hosts (see the comments in the config for clarity on which key strings go where).
@@ -143,7 +173,7 @@ Quicktun on the roving router provides a tap0 hooked to a tap0 on the home route
 
 ```
 From the roving /etc/config/quicktun:
-
+(I deleted the default configuration.)
 ...
 
 config quicktun tap0
@@ -159,7 +189,6 @@ config quicktun tap0
 
     # The local private key and the remote public key
     # A keypair can be generated with quicktun.keypair
-    # (nacl0 and nacltai protocols only)
     option private_key 0000000000000000000000000000000000000000000000000000000000000000
     option public_key 0000000000000000000000000000000000000000000000000000000000000000
 
@@ -213,6 +242,7 @@ Quicktun on the home side is configured for the roaming unit to be at any ip.
 ```
 
 From home side /etc/config/quicktun:
+(I deleted the default configuration.)
 
 ...
 config quicktun tap0
@@ -224,7 +254,6 @@ config quicktun tap0
     option interface "tap0"
     # The local private key and the remote public key
     # A keypair can be generated with quicktun.keypair
-    # (nacl0 and nacltai protocols only)
     option private_key 0000000000000000000000000000000000000000000000000000000000000000
     option public_key 0000000000000000000000000000000000000000000000000000000000000000
 
@@ -302,3 +331,16 @@ You may need to login to the roaming router and restart sockd after the wan  is 
 $ killall sockd ; sockd -D
 
 ```
+
+## Fixing the Build on OpenWRT
+
+I found that during this process I needed to fix the quicktun build package a lot.
+This command was handy to rebuild the package only from the openwrt build root:
+```
+make package/quicktun/clean V=s
+make package/quicktun/compile V=s
+```
+
+I also found the openwrt package docs to be helpful:
+https://wiki.openwrt.org/doc/devel/packages
+https://wiki.openwrt.org/inbox/procd-init-scripts
