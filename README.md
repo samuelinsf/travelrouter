@@ -18,28 +18,30 @@ Features:
 * Traveling vpn device uses wifi client mode (or ethernet) to connect to the untrusted network.
 * System fails safe, if the VPN cannot come up, my devices never talk on the untrusted network.
 * Supports ethernet bridge mode, so all protocols and technologies work over the VPN.
-* All based on Openwrt (2015 chaos calmer version) and Quicktun (a nacl crypto simple vpn)
+* All based on LEDE v17.01.4 and Quicktun (a nacl crypto simple vpn)
 
-
-These notes and hints were prepared several months after I quickly setup a vpn router for portable use.
-There are probably some details missing, but hopefully this is a start for you and your needs.
 
 This attempts to document the build of my setup for a traveling gl inet 6416 which offers a wifi AP which is tunneled to my home router. 
 
 * See: http://www.gl-inet.com/gl-inet6416/
 * And on amazon: https://www.amazon.com/Gl-iNet-Smart-Router-Openwrt-Modem/dp/B00JKFE0FW
+* Or the more recent https://www.amazon.com/GL-iNet-GL-MT300A-Pre-installed-Performance-Compatible/dp/B01DBS5Z0W
 
-All this is setup on openwrt chaos calmer aka 15.05.
+
 
 ## Quicktun install.
 
-To build quicktun I did these steps (OpenWRT docs may provide a quicker method, this is what worked for me).
-(OpenWRT docs: https://wiki.openwrt.org/doc/howto/build has build prerequisites .. I already had these on my system)
+To build quicktun I did these steps on my debian box.
+(LEDE docs: https://lede-project.org/docs/guide-developer/helloworld/chapter1 )
 
 ```
-git clone git://git.openwrt.org/15.05/openwrt.git
-cd openwrt
-git checkout 15.05
+mkdir lede-v17.01.4
+cd lede-v17.01.4
+git clone https://github.com/lede-project/source.git --depth 1 -b v17.01.4
+cd source
+make distclean
+make menuconfig
+make toolchain/install
 ```
 
 Add the nacl library with the feeds system:
@@ -49,11 +51,14 @@ Add the nacl library with the feeds system:
 ./scripts/feeds install nacl
 ```
 
-Then copy the contents of the `quicktun` directory from this repo into `openwrt/package/quicktun`.
+Then copy the contents of the `quicktun` directory from this repo into `package/quicktun`.
 
 `make menuconfig`
 
-Set the `Target System` to your platform, in my case `Atheros AR7xxx/AR9xxx`.
+Set the `Target System` to your platform:
+
+* For glinet 6416 `Atheros AR7xxx/AR9xxx`.
+* For glinet GL-MT300A  `MediaTek Ralink MIPS`. And Subtarget `MT7620 based boards`.
 
 Set quicktun to be built, go to `Network -> VPN` and for the quicktun package set it to be built `<*>`.
 
@@ -66,12 +71,13 @@ Find the package file .. I suppose there is a right way to do this .. but I just
 ```
 find . -name '*quicktun*ipk'
 ```
-On my system the package file showed up in: `bin/ar71xx/packages/base/quicktun_2.2.5-4_ar71xx.ipk`
+On my system the package file for the 6416 showed up in: `./bin/packages/mips_24kc/base/quicktun_2.2.5-4_mips_24kc.ipk`
 
+For the GL-MT300A the filename is `quicktun_2.2.5-4_mipsel_24kc.ipk`
 
 I built the package on my intel desktop linux system, and copied it over to the home, and roving routers, then did:
 ```
-router$ opkg install quicktun_2.2.5-4_ar71xx.ipk
+router$ opkg install quicktun_2.2.5-4_mips_24kc.ipk
 ```
 
 Then I made two sets of keys, one for the home router, one for the roving router.
@@ -262,9 +268,20 @@ config quicktun tap0
 ...
 
 ```
-## Known Problems
+## Upstream wifi
 
-If the travel router is configured in wifi client mode, and AP mode at the same time, and the client mode wifi becomes unavailable, the AP wifi will stop working. The fix is to disable the client wifi connection. I typically do this in the web UI before I leave a hotel where the router is on the wifi as a client. If I forget I have to connect to the travel router over the ethernet interface to fix the router.  This bug is in the hostapd for openwrt. See https://dev.openwrt.org/ticket/12000#comment:9  and https://forum.openwrt.org/viewtopic.php?id=41610 for more information about this. Ideally we should just debug and fix hostapd. (Its not that bad, just need to fully grok the netlink situation it is getting into).
+If the travel router is configured in wifi client mode, and AP mode at the same time, and the client mode wifi becomes unavailable, the AP wifi will stop working. 
+
+See https://dev.openwrt.org/ticket/12000#comment:9  and https://forum.openwrt.org/viewtopic.php?id=41610 for more information about this. Ideally we should just debug and fix hostapd. (Its not that bad, just need to fully grok the netlink situation it is getting into).
+
+The fix is to disable the client wifi connection. I typically do this in the web UI before I leave a hotel where the router is on the wifi as a client. If I forget I have to connect to the travel router over the ethernet interface to fix the router.  This bug is in the hostapd for openwrt. 
+
+The travelmate package can probably fix this:
+```
+opkg install travelmate luci-app-travelmate
+```
+
+## Problems
 
 Sometimes quicktun fails to come up if dns is not available on the wan at the right time.  Running `/etc/init.d/quicktun restart` fixes this.
 
@@ -334,7 +351,7 @@ $ killall sockd ; sockd -D
 
 ```
 
-## Fixing the Build on OpenWRT
+## Fixing the Build on OpenWRT / LEDE
 
 I found that during this process I needed to fix the quicktun build package a lot.
 This command was handy to rebuild the package only from the openwrt build root:
@@ -343,6 +360,6 @@ make package/quicktun/clean V=s
 make package/quicktun/compile V=s
 ```
 
-I also found the openwrt package docs to be helpful:
+I also found the openwrt package docs to be helpful, you may also want to explore the newer LEDE docs:
 https://wiki.openwrt.org/doc/devel/packages
 https://wiki.openwrt.org/inbox/procd-init-scripts
